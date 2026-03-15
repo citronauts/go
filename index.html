@@ -1,60 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Dot Game</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
+    body {
+      background: #1a1a2e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100dvh;
+      overflow: hidden;
+      font-family: monospace;
+      touch-action: none;
+    }
 
-        .container {
-            text-align: center;
-            padding: 3rem;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
+    #arena {
+      position: relative;
+      background: #16213e;
+      border: 2px solid #0f3460;
+      border-radius: 8px;
+      overflow: hidden;
+    }
 
-        h1 {
-            font-size: 4rem;
-            color: #333;
-            margin-bottom: 1rem;
-        }
+    canvas { display: block; }
 
-        p {
-            font-size: 1.25rem;
-            color: #666;
-        }
+    #controls {
+      display: grid;
+      grid-template-columns: repeat(3, 60px);
+      grid-template-rows: repeat(2, 60px);
+      gap: 8px;
+      margin-top: 16px;
+    }
 
-        .wave {
-            display: inline-block;
-            animation: wave 1.5s ease-in-out infinite;
-        }
+    .key-btn {
+      width: 60px;
+      height: 60px;
+      background: #0f3460;
+      color: #e94560;
+      border: 2px solid #e94560;
+      border-radius: 10px;
+      font-size: 22px;
+      font-weight: bold;
+      font-family: monospace;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.1s;
+    }
 
-        @keyframes wave {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(20deg); }
-            75% { transform: rotate(-20deg); }
-        }
-    </style>
+    .key-btn:active, .key-btn.pressed {
+      background: #e94560;
+      color: #fff;
+    }
+
+    /* W is in column 2, row 1; A col 1 row 2; S col 2 row 2; D col 3 row 2 */
+    #btn-w { grid-column: 2; grid-row: 1; }
+    #btn-a { grid-column: 1; grid-row: 2; }
+    #btn-s { grid-column: 2; grid-row: 2; }
+    #btn-d { grid-column: 3; grid-row: 2; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1><span class="wave">👋</span> hello world now</h1>
-        <p>Welcome to my first website</p>
-    </div>
+
+<div id="arena">
+  <canvas id="game"></canvas>
+</div>
+
+<div id="controls">
+  <button class="key-btn" id="btn-w">W</button>
+  <button class="key-btn" id="btn-a">A</button>
+  <button class="key-btn" id="btn-s">S</button>
+  <button class="key-btn" id="btn-d">D</button>
+</div>
+
+<script>
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+
+  // Size the arena to fit available space
+  function resize() {
+    const margin = 32;
+    const controlsH = 60 * 2 + 8 + 16 + 16; // grid + gap + marginTop + body padding
+    const maxW = window.innerWidth - margin * 2;
+    const maxH = window.innerHeight - controlsH - margin;
+    const size = Math.min(maxW, maxH, 420);
+    canvas.width = size;
+    canvas.height = size;
+    // Keep dot inside after resize
+    dot.x = Math.min(Math.max(dot.x, dot.r), size - dot.r);
+    dot.y = Math.min(Math.max(dot.y, dot.r), size - dot.r);
+  }
+
+  const dot = { x: 0, y: 0, r: 14, speed: 3 };
+  const keys = { w: false, a: false, s: false, d: false };
+
+  resize();
+  dot.x = canvas.width / 2;
+  dot.y = canvas.height / 2;
+  window.addEventListener('resize', resize);
+
+  // Keyboard input
+  window.addEventListener('keydown', e => {
+    const k = e.key.toLowerCase();
+    if (k in keys) { keys[k] = true; e.preventDefault(); }
+  });
+  window.addEventListener('keyup', e => {
+    const k = e.key.toLowerCase();
+    if (k in keys) keys[k] = false;
+  });
+
+  // On-screen button input (touch + mouse)
+  const btnMap = { 'btn-w': 'w', 'btn-a': 'a', 'btn-s': 's', 'btn-d': 'd' };
+  for (const [id, key] of Object.entries(btnMap)) {
+    const btn = document.getElementById(id);
+    const press = () => { keys[key] = true; btn.classList.add('pressed'); };
+    const release = () => { keys[key] = false; btn.classList.remove('pressed'); };
+    btn.addEventListener('pointerdown', press);
+    btn.addEventListener('pointerup', release);
+    btn.addEventListener('pointerleave', release);
+    btn.addEventListener('pointercancel', release);
+  }
+
+  // Trail
+  const trail = [];
+  const MAX_TRAIL = 18;
+
+  function update() {
+    let moved = false;
+    if (keys.w) { dot.y -= dot.speed; moved = true; }
+    if (keys.s) { dot.y += dot.speed; moved = true; }
+    if (keys.a) { dot.x -= dot.speed; moved = true; }
+    if (keys.d) { dot.x += dot.speed; moved = true; }
+
+    dot.x = Math.min(Math.max(dot.x, dot.r), canvas.width - dot.r);
+    dot.y = Math.min(Math.max(dot.y, dot.r), canvas.height - dot.r);
+
+    if (moved) trail.push({ x: dot.x, y: dot.y });
+    if (trail.length > MAX_TRAIL) trail.shift();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Trail
+    for (let i = 0; i < trail.length; i++) {
+      const t = trail[i];
+      const alpha = (i + 1) / trail.length * 0.5;
+      const r = dot.r * ((i + 1) / trail.length);
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(233, 69, 96, ${alpha})`;
+      ctx.fill();
+    }
+
+    // Glow
+    const grd = ctx.createRadialGradient(dot.x, dot.y, 0, dot.x, dot.y, dot.r * 2.5);
+    grd.addColorStop(0, 'rgba(233, 69, 96, 0.6)');
+    grd.addColorStop(1, 'rgba(233, 69, 96, 0)');
+    ctx.beginPath();
+    ctx.arc(dot.x, dot.y, dot.r * 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = grd;
+    ctx.fill();
+
+    // Dot
+    ctx.beginPath();
+    ctx.arc(dot.x, dot.y, dot.r, 0, Math.PI * 2);
+    ctx.fillStyle = '#e94560';
+    ctx.fill();
+  }
+
+  function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  loop();
+</script>
 </body>
 </html>
