@@ -48,13 +48,59 @@
       touch-action: none;
     }
 
+    /* Always-visible idle joystick guide */
+    #joystick-guide {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.15s;
+    }
+    #joystick-guide.hidden { opacity: 0; }
+
+    .joy-outer {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      border: 2px dashed rgba(74, 144, 217, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: joyIdlePulse 2.2s ease-in-out infinite;
+      box-shadow: 0 0 14px rgba(74, 144, 217, 0.2), inset 0 0 14px rgba(74, 144, 217, 0.07);
+    }
+    .joy-inner {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(74, 144, 217, 0.3);
+      border: 2px solid rgba(74, 144, 217, 0.8);
+      box-shadow: 0 0 10px rgba(74, 144, 217, 0.5);
+    }
+    .joy-label {
+      font-size: 11px;
+      color: rgba(74, 144, 217, 0.75);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    @keyframes joyIdlePulse {
+      0%, 100% { border-color: rgba(74, 144, 217, 0.5); box-shadow: 0 0 10px rgba(74, 144, 217, 0.15), inset 0 0 10px rgba(74, 144, 217, 0.05); }
+      50% { border-color: rgba(74, 144, 217, 0.9); box-shadow: 0 0 22px rgba(74, 144, 217, 0.35), inset 0 0 14px rgba(74, 144, 217, 0.12); }
+    }
+
     #joystick-base {
       position: absolute;
       width: 88px;
       height: 88px;
       border-radius: 50%;
-      background: rgba(74, 144, 217, 0.12);
-      border: 2px solid rgba(74, 144, 217, 0.35);
+      background: rgba(74, 144, 217, 0.18);
+      border: 2px solid rgba(74, 144, 217, 0.65);
+      box-shadow: 0 0 16px rgba(74, 144, 217, 0.4);
       display: none;
       transform: translate(-50%, -50%);
       pointer-events: none;
@@ -65,8 +111,9 @@
       width: 38px;
       height: 38px;
       border-radius: 50%;
-      background: rgba(74, 144, 217, 0.55);
+      background: rgba(74, 144, 217, 0.75);
       border: 2px solid #4a90d9;
+      box-shadow: 0 0 12px rgba(74, 144, 217, 0.8);
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
@@ -80,28 +127,57 @@
     }
 
     .action-btn {
+      position: relative;
+      overflow: hidden;
       width: 72px;
-      height: 52px;
-      background: #0f3460;
+      height: 58px;
+      background: rgba(233, 69, 96, 0.12);
       color: #e94560;
       border: 2px solid #e94560;
-      border-radius: 10px;
-      font-size: 20px;
-      font-weight: bold;
+      border-radius: 14px;
       font-family: monospace;
       cursor: pointer;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 2px;
       touch-action: none;
-      transition: background 0.08s;
+      box-shadow: 0 4px 0 rgba(233, 69, 96, 0.35), 0 0 14px rgba(233, 69, 96, 0.18);
+      transition: transform 0.07s, box-shadow 0.07s, background 0.07s;
+    }
+    .btn-letter {
+      font-size: 22px;
+      font-weight: bold;
+      line-height: 1;
+    }
+    .btn-sub {
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0.8;
     }
 
-    .action-btn:active, .action-btn.pressed {
+    .action-btn.pressed {
       background: #e94560;
       color: #fff;
+      transform: scale(0.91) translateY(3px);
+      box-shadow: 0 0 0 rgba(233, 69, 96, 0), 0 0 22px rgba(233, 69, 96, 0.7);
+    }
+
+    /* Ripple on press */
+    .btn-ripple {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 72%);
+      animation: rippleAnim 0.45s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes rippleAnim {
+      0%   { transform: scale(0.2); opacity: 1; }
+      100% { transform: scale(2.2); opacity: 0; }
     }
 
     #hint {
@@ -120,13 +196,23 @@
 
 <div id="controls">
   <div id="joystick-zone">
+    <div id="joystick-guide">
+      <div class="joy-outer"><div class="joy-inner"></div></div>
+      <div class="joy-label">move</div>
+    </div>
     <div id="joystick-base">
       <div id="joystick-thumb"></div>
     </div>
   </div>
   <div id="action-btns">
-    <button class="action-btn" id="btn-b">B</button>
-    <button class="action-btn" id="btn-l">L</button>
+    <button class="action-btn" id="btn-b">
+      <span class="btn-letter">B</span>
+      <span class="btn-sub">Build</span>
+    </button>
+    <button class="action-btn" id="btn-l">
+      <span class="btn-letter">L</span>
+      <span class="btn-sub">Launch</span>
+    </button>
   </div>
 </div>
 
@@ -190,15 +276,18 @@
   const joyBase  = document.getElementById('joystick-base');
   const joyThumb = document.getElementById('joystick-thumb');
   const joyZone  = document.getElementById('joystick-zone');
+  const joyGuide = document.getElementById('joystick-guide');
 
   function updateJoyUI() {
     if (joystick.active) {
+      joyGuide.classList.add('hidden');
       joyBase.style.display = 'block';
       joyBase.style.left = joystick.originX + 'px';
       joyBase.style.top  = joystick.originY + 'px';
       joyThumb.style.transform =
         `translate(calc(-50% + ${joystick.dx * MAX_JOY_R}px), calc(-50% + ${joystick.dy * MAX_JOY_R}px))`;
     } else {
+      joyGuide.classList.remove('hidden');
       joyBase.style.display = 'none';
       joyThumb.style.transform = 'translate(-50%, -50%)';
     }
@@ -247,6 +336,10 @@
       e.preventDefault();
       btn.setPointerCapture(e.pointerId);
       btn.classList.add('pressed');
+      const ripple = document.createElement('span');
+      ripple.className = 'btn-ripple';
+      btn.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 450);
       action();
     });
     btn.addEventListener('pointerup',     () => btn.classList.remove('pressed'));
