@@ -29,22 +29,64 @@
 
     canvas { display: block; }
 
+    /* Controls: joystick zone left, action buttons right */
     #controls {
-      display: grid;
-      grid-template-columns: repeat(3, 60px);
-      grid-template-rows: repeat(2, 60px);
-      gap: 8px;
-      margin-top: 16px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      width: 100%;
+      max-width: 420px;
+      height: 130px;
+      margin-top: 12px;
+      touch-action: none;
     }
 
-    .key-btn {
-      width: 60px;
-      height: 60px;
+    #joystick-zone {
+      flex: 1;
+      height: 100%;
+      position: relative;
+      touch-action: none;
+    }
+
+    #joystick-base {
+      position: absolute;
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: rgba(74, 144, 217, 0.12);
+      border: 2px solid rgba(74, 144, 217, 0.35);
+      display: none;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    #joystick-thumb {
+      position: absolute;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(74, 144, 217, 0.55);
+      border: 2px solid #4a90d9;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    #action-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 0 12px 0 8px;
+    }
+
+    .action-btn {
+      width: 72px;
+      height: 52px;
       background: #0f3460;
       color: #e94560;
       border: 2px solid #e94560;
       border-radius: 10px;
-      font-size: 22px;
+      font-size: 20px;
       font-weight: bold;
       font-family: monospace;
       cursor: pointer;
@@ -53,22 +95,17 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.1s;
+      touch-action: none;
+      transition: background 0.08s;
     }
 
-    .key-btn:active, .key-btn.pressed {
+    .action-btn:active, .action-btn.pressed {
       background: #e94560;
       color: #fff;
     }
 
-    /* W is in column 2, row 1; A col 1 row 2; S col 2 row 2; D col 3 row 2 */
-    #btn-w { grid-column: 2; grid-row: 1; }
-    #btn-a { grid-column: 1; grid-row: 2; }
-    #btn-s { grid-column: 2; grid-row: 2; }
-    #btn-d { grid-column: 3; grid-row: 2; }
-
     #hint {
-      margin-top: 12px;
+      margin-top: 10px;
       color: #4a90d9;
       font-size: 13px;
       opacity: 0.7;
@@ -82,10 +119,15 @@
 </div>
 
 <div id="controls">
-  <button class="key-btn" id="btn-w">W</button>
-  <button class="key-btn" id="btn-a">A</button>
-  <button class="key-btn" id="btn-s">S</button>
-  <button class="key-btn" id="btn-d">D</button>
+  <div id="joystick-zone">
+    <div id="joystick-base">
+      <div id="joystick-thumb"></div>
+    </div>
+  </div>
+  <div id="action-btns">
+    <button class="action-btn" id="btn-b">B</button>
+    <button class="action-btn" id="btn-l">L</button>
+  </div>
 </div>
 
 <div id="hint">[ B ] = Build &nbsp;|&nbsp; [ L ] = Launch</div>
@@ -97,13 +139,12 @@
   // Size the arena to fit available space
   function resize() {
     const margin = 32;
-    const controlsH = 60 * 2 + 8 + 16 + 16; // grid + gap + marginTop + body padding
+    const controlsH = 130 + 10 + 20 + 16;
     const maxW = window.innerWidth - margin * 2;
     const maxH = window.innerHeight - controlsH - margin;
     const size = Math.min(maxW, maxH, 420);
     canvas.width = size;
     canvas.height = size;
-    // Keep dot inside after resize
     dot.x = Math.min(Math.max(dot.x, dot.r), size - dot.r);
     dot.y = Math.min(Math.max(dot.y, dot.r), size - dot.r);
   }
@@ -111,11 +152,11 @@
   const dot = { x: 0, y: 0, r: 14, speed: 3 };
   const keys = { w: false, a: false, s: false, d: false };
   const buildings = [];
-  let buildState = null; // { x, y, startTime }
+  let buildState = null;
   const BUILD_TIME = 1500;
 
-  const missiles = [];   // { startX, startY, target, startTime }
-  const explosions = []; // { x, y, startTime }
+  const missiles = [];
+  const explosions = [];
   const LAUNCH_TIME = 1000;
   const EXPLOSION_TIME = 600;
   let score = 0;
@@ -125,7 +166,7 @@
   dot.y = canvas.height / 2;
   window.addEventListener('resize', resize);
 
-  // Keyboard input
+  // ── Keyboard input (desktop) ──────────────────────────────────────
   window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
     if (k in keys) { keys[k] = true; e.preventDefault(); }
@@ -134,15 +175,7 @@
       e.preventDefault();
     }
     if (k === 'l' && buildings.length > 0) {
-      // Find furthest building
-      let target = null, maxDist = -1;
-      for (const b of buildings) {
-        const d = Math.hypot(b.x - dot.x, b.y - dot.y);
-        if (d > maxDist) { maxDist = d; target = b; }
-      }
-      if (target) {
-        missiles.push({ startX: dot.x, startY: dot.y, target, startTime: performance.now() });
-      }
+      launchAtFurthest();
       e.preventDefault();
     }
   });
@@ -151,39 +184,124 @@
     if (k in keys) keys[k] = false;
   });
 
-  // On-screen button input (touch + mouse)
-  const btnMap = { 'btn-w': 'w', 'btn-a': 'a', 'btn-s': 's', 'btn-d': 'd' };
-  for (const [id, key] of Object.entries(btnMap)) {
-    const btn = document.getElementById(id);
-    const press = () => { keys[key] = true; btn.classList.add('pressed'); };
-    const release = () => { keys[key] = false; btn.classList.remove('pressed'); };
-    btn.addEventListener('pointerdown', press);
-    btn.addEventListener('pointerup', release);
-    btn.addEventListener('pointerleave', release);
-    btn.addEventListener('pointercancel', release);
+  // ── Virtual joystick ──────────────────────────────────────────────
+  const MAX_JOY_R = 44;
+  const joystick = { active: false, pointerId: null, originX: 0, originY: 0, dx: 0, dy: 0 };
+  const joyBase  = document.getElementById('joystick-base');
+  const joyThumb = document.getElementById('joystick-thumb');
+  const joyZone  = document.getElementById('joystick-zone');
+
+  function updateJoyUI() {
+    if (joystick.active) {
+      joyBase.style.display = 'block';
+      joyBase.style.left = joystick.originX + 'px';
+      joyBase.style.top  = joystick.originY + 'px';
+      joyThumb.style.transform =
+        `translate(calc(-50% + ${joystick.dx * MAX_JOY_R}px), calc(-50% + ${joystick.dy * MAX_JOY_R}px))`;
+    } else {
+      joyBase.style.display = 'none';
+      joyThumb.style.transform = 'translate(-50%, -50%)';
+    }
   }
 
-  // Trail
+  joyZone.addEventListener('pointerdown', e => {
+    if (joystick.active) return; // only one finger drives the stick
+    joyZone.setPointerCapture(e.pointerId);
+    const rect = joyZone.getBoundingClientRect();
+    joystick.active = true;
+    joystick.pointerId = e.pointerId;
+    joystick.originX = e.clientX - rect.left;
+    joystick.originY = e.clientY - rect.top;
+    joystick.dx = 0;
+    joystick.dy = 0;
+    updateJoyUI();
+  });
+
+  joyZone.addEventListener('pointermove', e => {
+    if (e.pointerId !== joystick.pointerId) return;
+    const rect = joyZone.getBoundingClientRect();
+    const rawDx = (e.clientX - rect.left) - joystick.originX;
+    const rawDy = (e.clientY - rect.top)  - joystick.originY;
+    const dist  = Math.hypot(rawDx, rawDy) || 1;
+    const clamped = Math.min(dist, MAX_JOY_R);
+    joystick.dx = (rawDx / dist) * (clamped / MAX_JOY_R);
+    joystick.dy = (rawDy / dist) * (clamped / MAX_JOY_R);
+    updateJoyUI();
+  });
+
+  function releaseJoy(e) {
+    if (e.pointerId !== joystick.pointerId) return;
+    joystick.active = false;
+    joystick.pointerId = null;
+    joystick.dx = 0;
+    joystick.dy = 0;
+    updateJoyUI();
+  }
+  joyZone.addEventListener('pointerup',     releaseJoy);
+  joyZone.addEventListener('pointercancel', releaseJoy);
+
+  // ── Action buttons (B and L) ──────────────────────────────────────
+  function setupActionBtn(id, action) {
+    const btn = document.getElementById(id);
+    btn.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      btn.setPointerCapture(e.pointerId);
+      btn.classList.add('pressed');
+      action();
+    });
+    btn.addEventListener('pointerup',     () => btn.classList.remove('pressed'));
+    btn.addEventListener('pointercancel', () => btn.classList.remove('pressed'));
+  }
+
+  setupActionBtn('btn-b', () => {
+    if (!buildState) buildState = { x: dot.x, y: dot.y, startTime: performance.now() };
+  });
+  setupActionBtn('btn-l', () => {
+    if (buildings.length > 0) launchAtFurthest();
+  });
+
+  // ── Shared launch logic ───────────────────────────────────────────
+  function launchAtFurthest() {
+    let target = null, maxDist = -1;
+    for (const b of buildings) {
+      const d = Math.hypot(b.x - dot.x, b.y - dot.y);
+      if (d > maxDist) { maxDist = d; target = b; }
+    }
+    if (target) missiles.push({ startX: dot.x, startY: dot.y, target, startTime: performance.now() });
+  }
+
+  // ── Trail ─────────────────────────────────────────────────────────
   const trail = [];
   const MAX_TRAIL = 18;
 
+  // ── Update ────────────────────────────────────────────────────────
   function update() {
     if (buildState) {
-      const elapsed = performance.now() - buildState.startTime;
-      if (elapsed >= BUILD_TIME) {
+      if (performance.now() - buildState.startTime >= BUILD_TIME) {
         buildings.push({ x: buildState.x, y: buildState.y });
         buildState = null;
       }
-      return; // frozen while building
+      return;
     }
 
-    let moved = false;
-    if (keys.w) { dot.y -= dot.speed; moved = true; }
-    if (keys.s) { dot.y += dot.speed; moved = true; }
-    if (keys.a) { dot.x -= dot.speed; moved = true; }
-    if (keys.d) { dot.x += dot.speed; moved = true; }
+    // Combine joystick + keyboard
+    let dx = joystick.dx;
+    let dy = joystick.dy;
+    if (keys.w) dy -= 1;
+    if (keys.s) dy += 1;
+    if (keys.a) dx -= 1;
+    if (keys.d) dx += 1;
 
-    dot.x = Math.min(Math.max(dot.x, dot.r), canvas.width - dot.r);
+    const len = Math.hypot(dx, dy);
+    let moved = false;
+    if (len > 0.05) {
+      const scale = Math.min(len, 1) / len;
+      dot.x += dx * scale * dot.speed;
+      dot.y += dy * scale * dot.speed;
+      moved = true;
+    }
+
+    dot.x = Math.min(Math.max(dot.x, dot.r), canvas.width  - dot.r);
     dot.y = Math.min(Math.max(dot.y, dot.r), canvas.height - dot.r);
 
     if (moved) trail.push({ x: dot.x, y: dot.y });
@@ -200,50 +318,35 @@
         score += 100;
       }
     }
-    // Expire explosions
     for (let i = explosions.length - 1; i >= 0; i--) {
       if (now - explosions[i].startTime >= EXPLOSION_TIME) explosions.splice(i, 1);
     }
   }
 
+  // ── Drawing helpers ───────────────────────────────────────────────
   function drawBuilding(x, y, alpha) {
     const bw = 34, bh = 46;
-    const bx = x - bw / 2;
-    const by = y - bh / 2;
+    const bx = x - bw / 2, by = y - bh / 2;
     ctx.globalAlpha = alpha;
-
-    // Body
     ctx.fillStyle = '#1e3a5f';
     ctx.fillRect(bx, by, bw, bh);
-
-    // Outline
     ctx.strokeStyle = '#4a90d9';
     ctx.lineWidth = 2;
     ctx.strokeRect(bx, by, bw, bh);
-
-    // Horizontal floor lines
     ctx.strokeStyle = '#2a4a6f';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(bx, by + 15); ctx.lineTo(bx + bw, by + 15);
     ctx.moveTo(bx, by + 30); ctx.lineTo(bx + bw, by + 30);
     ctx.stroke();
-
-    // Windows (2 columns x 2 rows)
     ctx.fillStyle = '#7ec8e3';
-    const wins = [
-      [bx + 5, by + 4], [bx + bw - 12, by + 4],
-      [bx + 5, by + 19], [bx + bw - 12, by + 19],
-    ];
-    for (const [wx, wy] of wins) ctx.fillRect(wx, wy, 7, 7);
-
-    // Door
+    for (const [wx, wy] of [[bx+5,by+4],[bx+bw-12,by+4],[bx+5,by+19],[bx+bw-12,by+19]])
+      ctx.fillRect(wx, wy, 7, 7);
     ctx.fillStyle = '#0f3460';
-    ctx.fillRect(bx + bw / 2 - 4, by + bh - 12, 8, 12);
+    ctx.fillRect(bx + bw/2 - 4, by + bh - 12, 8, 12);
     ctx.strokeStyle = '#4a90d9';
     ctx.lineWidth = 1;
-    ctx.strokeRect(bx + bw / 2 - 4, by + bh - 12, 8, 12);
-
+    ctx.strokeRect(bx + bw/2 - 4, by + bh - 12, 8, 12);
     ctx.globalAlpha = 1;
   }
 
@@ -252,8 +355,6 @@
     const x = m.startX + (m.target.x - m.startX) * t;
     const arcH = Math.min(120, Math.hypot(m.target.x - m.startX, m.target.y - m.startY) * 0.5);
     const y = m.startY + (m.target.y - m.startY) * t - arcH * Math.sin(Math.PI * t);
-
-    // Short trail
     for (let i = 1; i <= 6; i++) {
       const tp = Math.max(0, t - i * 0.03);
       const tx = m.startX + (m.target.x - m.startX) * tp;
@@ -265,52 +366,34 @@
       ctx.fill();
     }
     ctx.globalAlpha = 1;
-
-    // Projectile
     const grd = ctx.createRadialGradient(x, y, 0, x, y, 10);
     grd.addColorStop(0, 'rgba(255,200,50,0.9)');
     grd.addColorStop(1, 'rgba(255,100,0,0)');
-    ctx.beginPath();
-    ctx.arc(x, y, 10, 0, Math.PI * 2);
-    ctx.fillStyle = grd;
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(x, y, 5, 0, Math.PI * 2);
-    ctx.fillStyle = '#fff';
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2);
+    ctx.fillStyle = grd; ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff'; ctx.fill();
   }
 
   function drawExplosion(e) {
     const t = (performance.now() - e.startTime) / EXPLOSION_TIME;
     const alpha = 1 - t;
-
-    // Outer ring
     ctx.globalAlpha = alpha * 0.8;
-    ctx.beginPath();
-    ctx.arc(e.x, e.y, 50 * t, 0, Math.PI * 2);
-    ctx.strokeStyle = '#ff6b35';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    // Inner flash
+    ctx.beginPath(); ctx.arc(e.x, e.y, 50 * t, 0, Math.PI * 2);
+    ctx.strokeStyle = '#ff6b35'; ctx.lineWidth = 3; ctx.stroke();
     ctx.globalAlpha = alpha * 0.5;
-    ctx.beginPath();
-    ctx.arc(e.x, e.y, 28 * t, 0, Math.PI * 2);
-    ctx.fillStyle = '#ffd700';
-    ctx.fill();
-
-    // "+100" text
+    ctx.beginPath(); ctx.arc(e.x, e.y, 28 * t, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffd700'; ctx.fill();
     ctx.globalAlpha = alpha;
     ctx.fillStyle = '#ffd700';
     ctx.font = 'bold 16px monospace';
     ctx.textAlign = 'center';
     ctx.fillText('+100', e.x, e.y - 30 * t - 10);
     ctx.textAlign = 'left';
-
     ctx.globalAlpha = 1;
   }
 
+  // ── Draw ──────────────────────────────────────────────────────────
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -321,31 +404,19 @@
     ctx.fillText(`score: ${score}`, canvas.width - 8, 20);
     ctx.textAlign = 'left';
 
-    // Completed buildings
     for (const b of buildings) drawBuilding(b.x, b.y, 1);
 
-    // Building in progress
     if (buildState) {
       const progress = (performance.now() - buildState.startTime) / BUILD_TIME;
-
-      // Ghost building that fades in
       drawBuilding(buildState.x, buildState.y, 0.3 + progress * 0.7);
-
-      // Progress bar above building
       const barW = 40, barH = 5;
-      const bx = buildState.x - barW / 2;
-      const by = buildState.y - 34;
-      ctx.fillStyle = '#0f3460';
-      ctx.fillRect(bx, by, barW, barH);
-      ctx.fillStyle = '#e94560';
-      ctx.fillRect(bx, by, barW * progress, barH);
-      ctx.strokeStyle = '#4a90d9';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(bx, by, barW, barH);
+      const bx = buildState.x - barW / 2, by = buildState.y - 34;
+      ctx.fillStyle = '#0f3460'; ctx.fillRect(bx, by, barW, barH);
+      ctx.fillStyle = '#e94560'; ctx.fillRect(bx, by, barW * progress, barH);
+      ctx.strokeStyle = '#4a90d9'; ctx.lineWidth = 1; ctx.strokeRect(bx, by, barW, barH);
     }
 
-    // Missiles and explosions
-    for (const m of missiles) drawMissile(m);
+    for (const m of missiles)   drawMissile(m);
     for (const e of explosions) drawExplosion(e);
 
     // Trail
@@ -353,34 +424,23 @@
       const t = trail[i];
       const alpha = (i + 1) / trail.length * 0.5;
       const r = dot.r * ((i + 1) / trail.length);
-      ctx.beginPath();
-      ctx.arc(t.x, t.y, r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(233, 69, 96, ${alpha})`;
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(t.x, t.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(233, 69, 96, ${alpha})`; ctx.fill();
     }
 
     // Glow
     const grd = ctx.createRadialGradient(dot.x, dot.y, 0, dot.x, dot.y, dot.r * 2.5);
     grd.addColorStop(0, 'rgba(233, 69, 96, 0.6)');
     grd.addColorStop(1, 'rgba(233, 69, 96, 0)');
-    ctx.beginPath();
-    ctx.arc(dot.x, dot.y, dot.r * 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = grd;
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(dot.x, dot.y, dot.r * 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = grd; ctx.fill();
 
     // Dot
-    ctx.beginPath();
-    ctx.arc(dot.x, dot.y, dot.r, 0, Math.PI * 2);
-    ctx.fillStyle = '#e94560';
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(dot.x, dot.y, dot.r, 0, Math.PI * 2);
+    ctx.fillStyle = '#e94560'; ctx.fill();
   }
 
-  function loop() {
-    update();
-    draw();
-    requestAnimationFrame(loop);
-  }
-
+  function loop() { update(); draw(); requestAnimationFrame(loop); }
   loop();
 </script>
 </body>
