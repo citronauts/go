@@ -88,7 +88,7 @@
   <button class="key-btn" id="btn-d">D</button>
 </div>
 
-<div id="hint">[ B ] = Build</div>
+<div id="hint">[ B ] = Build &nbsp;|&nbsp; [ L ] = Launch</div>
 
 <script>
   const canvas = document.getElementById('game');
@@ -114,6 +114,12 @@
   let buildState = null; // { x, y, startTime }
   const BUILD_TIME = 1500;
 
+  const missiles = [];   // { startX, startY, target, startTime }
+  const explosions = []; // { x, y, startTime }
+  const LAUNCH_TIME = 1000;
+  const EXPLOSION_TIME = 600;
+  let score = 0;
+
   resize();
   dot.x = canvas.width / 2;
   dot.y = canvas.height / 2;
@@ -125,6 +131,18 @@
     if (k in keys) { keys[k] = true; e.preventDefault(); }
     if (k === 'b' && !buildState) {
       buildState = { x: dot.x, y: dot.y, startTime: performance.now() };
+      e.preventDefault();
+    }
+    if (k === 'l' && buildings.length > 0) {
+      // Find furthest building
+      let target = null, maxDist = -1;
+      for (const b of buildings) {
+        const d = Math.hypot(b.x - dot.x, b.y - dot.y);
+        if (d > maxDist) { maxDist = d; target = b; }
+      }
+      if (target) {
+        missiles.push({ startX: dot.x, startY: dot.y, target, startTime: performance.now() });
+      }
       e.preventDefault();
     }
   });
@@ -170,6 +188,22 @@
 
     if (moved) trail.push({ x: dot.x, y: dot.y });
     if (trail.length > MAX_TRAIL) trail.shift();
+
+    // Resolve missiles
+    const now = performance.now();
+    for (let i = missiles.length - 1; i >= 0; i--) {
+      if (now - missiles[i].startTime >= LAUNCH_TIME) {
+        const m = missiles.splice(i, 1)[0];
+        const idx = buildings.indexOf(m.target);
+        if (idx !== -1) buildings.splice(idx, 1);
+        explosions.push({ x: m.target.x, y: m.target.y, startTime: now });
+        score += 100;
+      }
+    }
+    // Expire explosions
+    for (let i = explosions.length - 1; i >= 0; i--) {
+      if (now - explosions[i].startTime >= EXPLOSION_TIME) explosions.splice(i, 1);
+    }
   }
 
   function drawBuilding(x, y, alpha) {
@@ -213,8 +247,79 @@
     ctx.globalAlpha = 1;
   }
 
+  function drawMissile(m) {
+    const t = (performance.now() - m.startTime) / LAUNCH_TIME;
+    const x = m.startX + (m.target.x - m.startX) * t;
+    const arcH = Math.min(120, Math.hypot(m.target.x - m.startX, m.target.y - m.startY) * 0.5);
+    const y = m.startY + (m.target.y - m.startY) * t - arcH * Math.sin(Math.PI * t);
+
+    // Short trail
+    for (let i = 1; i <= 6; i++) {
+      const tp = Math.max(0, t - i * 0.03);
+      const tx = m.startX + (m.target.x - m.startX) * tp;
+      const ty = m.startY + (m.target.y - m.startY) * tp - arcH * Math.sin(Math.PI * tp);
+      ctx.globalAlpha = (1 - i / 7) * 0.5;
+      ctx.beginPath();
+      ctx.arc(tx, ty, 4 - i * 0.4, 0, Math.PI * 2);
+      ctx.fillStyle = '#ff9500';
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // Projectile
+    const grd = ctx.createRadialGradient(x, y, 0, x, y, 10);
+    grd.addColorStop(0, 'rgba(255,200,50,0.9)');
+    grd.addColorStop(1, 'rgba(255,100,0,0)');
+    ctx.beginPath();
+    ctx.arc(x, y, 10, 0, Math.PI * 2);
+    ctx.fillStyle = grd;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+  }
+
+  function drawExplosion(e) {
+    const t = (performance.now() - e.startTime) / EXPLOSION_TIME;
+    const alpha = 1 - t;
+
+    // Outer ring
+    ctx.globalAlpha = alpha * 0.8;
+    ctx.beginPath();
+    ctx.arc(e.x, e.y, 50 * t, 0, Math.PI * 2);
+    ctx.strokeStyle = '#ff6b35';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Inner flash
+    ctx.globalAlpha = alpha * 0.5;
+    ctx.beginPath();
+    ctx.arc(e.x, e.y, 28 * t, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffd700';
+    ctx.fill();
+
+    // "+100" text
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = '#ffd700';
+    ctx.font = 'bold 16px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('+100', e.x, e.y - 30 * t - 10);
+    ctx.textAlign = 'left';
+
+    ctx.globalAlpha = 1;
+  }
+
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Score
+    ctx.fillStyle = '#4a90d9';
+    ctx.font = 'bold 14px monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(`score: ${score}`, canvas.width - 8, 20);
+    ctx.textAlign = 'left';
 
     // Completed buildings
     for (const b of buildings) drawBuilding(b.x, b.y, 1);
@@ -238,6 +343,10 @@
       ctx.lineWidth = 1;
       ctx.strokeRect(bx, by, barW, barH);
     }
+
+    // Missiles and explosions
+    for (const m of missiles) drawMissile(m);
+    for (const e of explosions) drawExplosion(e);
 
     // Trail
     for (let i = 0; i < trail.length; i++) {
