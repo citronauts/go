@@ -101,6 +101,9 @@
 
   const dot = { x: 0, y: 0, r: 14, speed: 3 };
   const keys = { w: false, a: false, s: false, d: false };
+  const buildings = [];
+  let buildState = null; // { x, y, startTime }
+  const BUILD_TIME = 1500;
 
   resize();
   dot.x = canvas.width / 2;
@@ -111,6 +114,10 @@
   window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
     if (k in keys) { keys[k] = true; e.preventDefault(); }
+    if (k === 'b' && !buildState) {
+      buildState = { x: dot.x, y: dot.y, startTime: performance.now() };
+      e.preventDefault();
+    }
   });
   window.addEventListener('keyup', e => {
     const k = e.key.toLowerCase();
@@ -134,6 +141,15 @@
   const MAX_TRAIL = 18;
 
   function update() {
+    if (buildState) {
+      const elapsed = performance.now() - buildState.startTime;
+      if (elapsed >= BUILD_TIME) {
+        buildings.push({ x: buildState.x, y: buildState.y });
+        buildState = null;
+      }
+      return; // frozen while building
+    }
+
     let moved = false;
     if (keys.w) { dot.y -= dot.speed; moved = true; }
     if (keys.s) { dot.y += dot.speed; moved = true; }
@@ -147,8 +163,72 @@
     if (trail.length > MAX_TRAIL) trail.shift();
   }
 
+  function drawBuilding(x, y, alpha) {
+    const bw = 34, bh = 46;
+    const bx = x - bw / 2;
+    const by = y - bh / 2;
+    ctx.globalAlpha = alpha;
+
+    // Body
+    ctx.fillStyle = '#1e3a5f';
+    ctx.fillRect(bx, by, bw, bh);
+
+    // Outline
+    ctx.strokeStyle = '#4a90d9';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(bx, by, bw, bh);
+
+    // Horizontal floor lines
+    ctx.strokeStyle = '#2a4a6f';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(bx, by + 15); ctx.lineTo(bx + bw, by + 15);
+    ctx.moveTo(bx, by + 30); ctx.lineTo(bx + bw, by + 30);
+    ctx.stroke();
+
+    // Windows (2 columns x 2 rows)
+    ctx.fillStyle = '#7ec8e3';
+    const wins = [
+      [bx + 5, by + 4], [bx + bw - 12, by + 4],
+      [bx + 5, by + 19], [bx + bw - 12, by + 19],
+    ];
+    for (const [wx, wy] of wins) ctx.fillRect(wx, wy, 7, 7);
+
+    // Door
+    ctx.fillStyle = '#0f3460';
+    ctx.fillRect(bx + bw / 2 - 4, by + bh - 12, 8, 12);
+    ctx.strokeStyle = '#4a90d9';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(bx + bw / 2 - 4, by + bh - 12, 8, 12);
+
+    ctx.globalAlpha = 1;
+  }
+
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Completed buildings
+    for (const b of buildings) drawBuilding(b.x, b.y, 1);
+
+    // Building in progress
+    if (buildState) {
+      const progress = (performance.now() - buildState.startTime) / BUILD_TIME;
+
+      // Ghost building that fades in
+      drawBuilding(buildState.x, buildState.y, 0.3 + progress * 0.7);
+
+      // Progress bar above building
+      const barW = 40, barH = 5;
+      const bx = buildState.x - barW / 2;
+      const by = buildState.y - 34;
+      ctx.fillStyle = '#0f3460';
+      ctx.fillRect(bx, by, barW, barH);
+      ctx.fillStyle = '#e94560';
+      ctx.fillRect(bx, by, barW * progress, barH);
+      ctx.strokeStyle = '#4a90d9';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(bx, by, barW, barH);
+    }
 
     // Trail
     for (let i = 0; i < trail.length; i++) {
