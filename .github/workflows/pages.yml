@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - claude/hello-world-website-4FFUu
+      - claude/laundry-folding-camp-site-fzck5i
       - main
 
 jobs:

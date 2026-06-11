@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laundry Folding Camp — Sunriver, Oregon</title>
+<meta name="description" content="The premier summer camp where 7-year-olds fold laundry. All day. Sunriver, Oregon.">
+<style>
+  :root {
+    --pine: #1e5631;
+    --pine-dark: #143d22;
+    --sky: #aee3f5;
+    --sun: #ffb648;
+    --cream: #fdf6ec;
+    --rust: #c1542c;
+    --denim: #34608d;
+    --ink: #25332a;
+    --card: #ffffff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    color: var(--ink);
+    background: var(--cream);
+    line-height: 1.6;
+  }
+  h1, h2, h3, .nav, .btn, .badge-name, .sched-time {
+    font-family: 'Trebuchet MS', 'Segoe UI', Verdana, sans-serif;
+  }
+
+  /* ---------- Nav ---------- */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--pine-dark);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  }
+  nav .logo {
+    font-family: 'Trebuchet MS', sans-serif;
+    font-weight: bold;
+    font-size: 1.05rem;
+    letter-spacing: 0.03em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  nav .logo svg { flex: 0 0 auto; }
+  nav .links { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+  nav a {
+    color: #d9ead9;
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+  }
+  nav a:hover, nav a:focus { background: rgba(255,255,255,0.15); color: #fff; }
+
+  /* ---------- Hero ---------- */
+  header.hero { position: relative; }
+  .hero-art { display: block; width: 100%; height: auto; }
+  .hero-copy {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 5%;
+    text-align: center;
+    pointer-events: none;
+  }
+  .hero-copy h1 {
+    font-size: clamp(1.6rem, 6vw, 3.6rem);
+    color: var(--pine-dark);
+    text-shadow: 0 2px 0 rgba(255,255,255,0.7);
+    letter-spacing: 0.02em;
+  }
+  .hero-copy p.tag {
+    font-style: italic;
+    font-size: clamp(0.9rem, 2.8vw, 1.4rem);
+    color: #4a3c26;
+    margin-top: 0.25rem;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+  }
+  .hero-copy .est {
+    margin-top: 0.4rem;
+    font-size: clamp(0.65rem, 1.8vw, 0.85rem);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #6b5a3a;
+  }
+  .hero-cta {
+    pointer-events: auto;
+    margin-top: clamp(0.5rem, 2vw, 1.2rem);
+  }
+  .btn {
+    display: inline-block;
+    background: var(--rust);
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 0.7rem 1.6rem;
+    border-radius: 999px;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 7px 16px rgba(0,0,0,0.3); }
+
+  /* ---------- Sections ---------- */
+  section { max-width: 1060px; margin: 0 auto; padding: 3rem 1.25rem; }
+  section h2 {
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    color: var(--pine);
+    text-align: center;
+    margin-bottom: 0.4rem;
+  }
+  section .sub {
+    text-align: center;
+    font-style: italic;
+    color: #6e6a5e;
+    margin-bottom: 2rem;
+  }
+  .rule {
+    width: 90px; height: 4px;
+    margin: 0.6rem auto 1rem;
+    background: var(--sun);
+    border-radius: 2px;
+  }
+
+  /* ---------- About ---------- */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: center;
+  }
+  .about-grid p { margin-bottom: 1rem; font-size: 1.05rem; }
+  .about-grid p strong { color: var(--rust); }
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+  }
+  .stat {
+    background: var(--card);
+    border: 2px solid var(--pine);
+    border-radius: 12px;
+    text-align: center;
+    padding: 0.8rem 0.4rem;
+  }
+  .stat .num {
+    font-family: 'Trebuchet MS', sans-serif;
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: var(--pine);
+    display: block;
+  }
+  .stat .lbl { font-size: 0.75rem; color: #6e6a5e; }
+
+  /* ---------- Gallery ---------- */
+  #gallery { background: #efe7d8; max-width: none; }
+  #gallery .inner { max-width: 1060px; margin: 0 auto; }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  figure.photo {
+    background: #fff;
+    padding: 10px 10px 0;
+    border-radius: 6px;
+    box-shadow: 0 6px 18px rgba(60,45,20,0.22);
+    transform: rotate(-1deg);
+    transition: transform 0.2s ease;
+  }
+  figure.photo:nth-child(even) { transform: rotate(1.2deg); }
+  figure.photo:hover { transform: rotate(0) scale(1.02); }
+  figure.photo svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 3px;
+  }
+  figure.photo figcaption {
+    font-family: 'Comic Sans MS', 'Trebuchet MS', cursive;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 0.6rem 0.4rem 0.8rem;
+    color: #4a4438;
+  }
+
+  /* ---------- Schedule ---------- */
+  .sched {
+    max-width: 640px;
+    margin: 0 auto;
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(60,45,20,0.15);
+    overflow: hidden;
+  }
+  .sched-row {
+    display: flex;
+    gap: 1rem;
+    padding: 0.8rem 1.2rem;
+    border-bottom: 1px dashed #e0d8c6;
+    align-items: baseline;
+  }
+  .sched-row:last-child { border-bottom: none; }
+  .sched-row:nth-child(odd) { background: #fbf7ef; }
+  .sched-time {
+    flex: 0 0 84px;
+    font-weight: bold;
+    color: var(--denim);
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+  .sched-what { font-size: 0.98rem; }
+  .sched-what em { color: #8a8270; font-size: 0.85rem; }
+
+  /* ---------- Badges ---------- */
+  .badge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  .badge {
+    background: var(--card);
+    border-radius: 14px;
+    text-align: center;
+    padding: 1.2rem 0.8rem;
+    box-shadow: 0 4px 12px rgba(60,45,20,0.12);
+    border-top: 5px solid var(--sun);
+  }
+  .badge .emoji { font-size: 2.2rem; display: block; margin-bottom: 0.4rem; }
+  .badge-name { font-weight: bold; color: var(--pine); display: block; }
+  .badge p { font-size: 0.8rem; color: #6e6a5e; margin-top: 0.3rem; }
+
+  /* ---------- Testimonials ---------- */
+  #words { background: var(--pine-dark); color: #f2efe6; max-width: none; }
+  #words .inner { max-width: 1060px; margin: 0 auto; }
+  #words h2 { color: #ffd98a; }
+  #words .sub { color: #b8c9b8; }
+  .quote-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+  blockquote {
+    background: rgba(255,255,255,0.08);
+    border-left: 4px solid var(--sun);
+    border-radius: 0 12px 12px 0;
+    padding: 1.2rem 1.2rem 1rem;
+    font-style: italic;
+    font-size: 1rem;
+  }
+  blockquote cite {
+    display: block;
+    margin-top: 0.7rem;
+    font-style: normal;
+    font-size: 0.82rem;
+    color: #ffd98a;
+  }
+
+  /* ---------- Enroll ---------- */
+  #enroll { text-align: center; }
+  .enroll-card {
+    max-width: 560px;
+    margin: 0 auto;
+    background: var(--card);
+    border-radius: 18px;
+    padding: 2rem 1.5rem;
+    box-shadow: 0 8px 24px rgba(60,45,20,0.18);
+    border: 3px dashed var(--sun);
+  }
+  .price {
+    font-family: 'Trebuchet MS', sans-serif;
+    font-size: 2.4rem;
+    font-weight: bold;
+    color: var(--rust);
+  }
+  .price small { font-size: 1rem; color: #6e6a5e; font-weight: normal; }
+  .fine { font-size: 0.75rem; color: #9a937f; margin-top: 1rem; }
+
+  /* ---------- Footer ---------- */
+  footer {
+    background: var(--ink);
+    color: #cfc9ba;
+    text-align: center;
+    padding: 2rem 1rem;
+    font-size: 0.85rem;
+  }
+  footer .loc { color: #ffd98a; font-weight: bold; }
+
+  @media (max-width: 720px) {
+    .about-grid { grid-template-columns: 1fr; }
+    nav .links { font-size: 0.8rem; }
+    .hero-copy { padding-top: 3%; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">
+    <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true">
+      <rect x="3" y="9" width="20" height="5" rx="1" fill="#ffd98a"/>
+      <rect x="3" y="15" width="20" height="5" rx="1" fill="#aee3f5"/>
+      <path d="M3 8 L13 2 L23 8" fill="none" stroke="#ffd98a" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    LAUNDRY FOLDING CAMP
+  </span>
+  <span class="links">
+    <a href="#about">About</a>
+    <a href="#gallery">Photos</a>
+    <a href="#day">A Day at Camp</a>
+    <a href="#badges">Badges</a>
+    <a href="#words">Families</a>
+    <a href="#enroll">Enroll</a>
+  </span>
+</nav>
+
+<header class="hero">
+  <!-- Hero: Sunriver meadow, Mt. Bachelor, pines, folding tables -->
+  <svg class="hero-art" viewBox="0 0 1200 560" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Illustration of campers folding laundry in a Sunriver meadow below Mount Bachelor">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#7ec8e8"/>
+        <stop offset="0.6" stop-color="#bfe6f4"/>
+        <stop offset="1" stop-color="#fbe9c2"/>
+      </linearGradient>
+      <linearGradient id="meadow" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#a8c66c"/>
+        <stop offset="1" stop-color="#7da64f"/>
+      </linearGradient>
+      <linearGradient id="river" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#5aa7c9"/>
+        <stop offset="1" stop-color="#7fc3dd"/>
+      </linearGradient>
+    </defs>
+    <rect width="1200" height="380" fill="url(#sky)"/>
+    <circle cx="980" cy="95" r="48" fill="#ffd34d"/>
+    <circle cx="980" cy="95" r="64" fill="#ffd34d" opacity="0.3"/>
+    <!-- clouds -->
+    <g fill="#ffffff" opacity="0.85">
+      <ellipse cx="220" cy="80" rx="70" ry="20"/>
+      <ellipse cx="270" cy="68" rx="45" ry="16"/>
+      <ellipse cx="640" cy="60" rx="55" ry="15"/>
+      <ellipse cx="690" cy="50" rx="35" ry="12"/>
+    </g>
+    <!-- Mt. Bachelor -->
+    <path d="M340 330 L600 110 L860 330 Z" fill="#8b9bb0"/>
+    <path d="M600 110 L530 170 L560 168 L585 195 L615 165 L645 192 L672 168 L700 195 L600 110 Z" fill="#f4f8fb"/>
+    <path d="M340 330 L600 110 L640 144 L380 330 Z" fill="#7a8aa0" opacity="0.6"/>
+    <!-- distant ridge -->
+    <path d="M0 330 Q150 250 300 320 Q420 270 560 330 L0 330 Z" fill="#5d7d6a"/>
+    <path d="M700 330 Q860 260 1000 322 Q1090 285 1200 330 Z" fill="#5d7d6a"/>
+    <!-- meadow -->
+    <rect y="320" width="1200" height="240" fill="url(#meadow)"/>
+    <!-- river -->
+    <path d="M-20 560 C 200 470, 340 520, 520 455 C 640 412, 760 430, 920 392 C1030 366, 1120 360, 1210 352 L1210 392 C1100 398, 1010 404, 930 426 C 780 466, 660 450, 540 492 C 380 548, 230 510, -20 600 Z" fill="url(#river)"/>
+    <path d="M120 520 q30 -8 60 0 M300 480 q30 -8 60 0 M620 440 q26 -7 52 0 M880 405 q24 -6 48 0" stroke="#ffffff" stroke-width="3" fill="none" opacity="0.5" stroke-linecap="round"/>
+    <!-- pines -->
+    <g>
+      <g transform="translate(70,250)">
+        <rect x="-6" y="70" width="12" height="26" fill="#6b4a2b"/>
+        <path d="M0 -30 L34 28 L-34 28 Z" fill="#1e5631"/>
+        <path d="M0 0 L40 52 L-40 52 Z" fill="#246b3c"/>
+        <path d="M0 28 L46 76 L-46 76 Z" fill="#1e5631"/>
+      </g>
+      <g transform="translate(160,270) scale(0.8)">
+        <rect x="-6" y="70" width="12" height="26" fill="#6b4a2b"/>
+        <path d="M0 -30 L34 28 L-34 28 Z" fill="#246b3c"/>
+        <path d="M0 0 L40 52 L-40 52 Z" fill="#1e5631"/>
+        <path d="M0 28 L46 76 L-46 76 Z" fill="#143d22"/>
+      </g>
+      <g transform="translate(1080,255) scale(1.05)">
+        <rect x="-6" y="70" width="12" height="26" fill="#6b4a2b"/>
+        <path d="M0 -30 L34 28 L-34 28 Z" fill="#1e5631"/>
+        <path d="M0 0 L40 52 L-40 52 Z" fill="#246b3c"/>
+        <path d="M0 28 L46 76 L-46 76 Z" fill="#1e5631"/>
+      </g>
+      <g transform="translate(1165,280) scale(0.7)">
+        <rect x="-6" y="70" width="12" height="26" fill="#6b4a2b"/>
+        <path d="M0 -30 L34 28 L-34 28 Z" fill="#246b3c"/>
+        <path d="M0 0 L40 52 L-40 52 Z" fill="#1e5631"/>
+        <path d="M0 28 L46 76 L-46 76 Z" fill="#143d22"/>
+      </g>
+    </g>
+    <!-- clothesline between two pines -->
+    <path d="M105 300 Q 400 350 690 305" stroke="#5a4632" stroke-width="3" fill="none"/>
+    <g>
+      <rect x="180" y="318" width="44" height="34" rx="3" fill="#e8634a"/>
+      <rect x="260" y="324" width="40" height="40" rx="3" fill="#f5c64f"/>
+      <rect x="340" y="330" width="48" height="32" rx="3" fill="#7fc3dd"/>
+      <rect x="430" y="330" width="38" height="42" rx="3" fill="#b48fd9"/>
+      <rect x="520" y="322" width="46" height="34" rx="3" fill="#8fc97e"/>
+      <path d="M180 318 l0 -8 M224 318 l0 -8 M260 324 l0 -8 M300 324 l0 -8 M340 330 l0 -8 M388 330 l0 -8 M430 330 l0 -9 M468 330 l0 -9 M520 322 l0 -7 M566 322 l0 -7" stroke="#5a4632" stroke-width="2.5"/>
+    </g>
+    <!-- folding tables with campers -->
+    <g>
+      <!-- table 1 -->
+      <g transform="translate(250,430)">
+        <rect x="-70" y="0" width="140" height="12" rx="3" fill="#a9743f"/>
+        <rect x="-62" y="12" width="8" height="34" fill="#7c5630"/>
+        <rect x="54" y="12" width="8" height="34" fill="#7c5630"/>
+        <!-- folded stacks -->
+        <g>
+          <rect x="-58" y="-10" width="34" height="6" rx="2" fill="#e8634a"/>
+          <rect x="-56" y="-16" width="30" height="6" rx="2" fill="#f5c64f"/>
+          <rect x="-54" y="-22" width="26" height="6" rx="2" fill="#7fc3dd"/>
+        </g>
+        <rect x="18" y="-9" width="36" height="9" rx="2" fill="#ffffff" stroke="#d8d2c4"/>
+        <!-- camper -->
+        <g transform="translate(-8,-26)">
+          <circle cx="0" cy="-14" r="11" fill="#f1c08e"/>
+          <path d="M-11 -17 A11 11 0 0 1 11 -17 L8 -23 L-8 -23 Z" fill="#6b4a2b"/>
+          <rect x="-11" y="-4" width="22" height="24" rx="6" fill="#2f7d4f"/>
+          <rect x="-18" y="-2" width="8" height="18" rx="4" fill="#2f7d4f" transform="rotate(20 -14 -2)"/>
+          <rect x="10" y="-2" width="8" height="18" rx="4" fill="#2f7d4f" transform="rotate(-20 14 -2)"/>
+        </g>
+      </g>
+      <!-- table 2 -->
+      <g transform="translate(620,455)">
+        <rect x="-75" y="0" width="150" height="12" rx="3" fill="#a9743f"/>
+        <rect x="-66" y="12" width="8" height="34" fill="#7c5630"/>
+        <rect x="58" y="12" width="8" height="34" fill="#7c5630"/>
+        <g>
+          <rect x="22" y="-10" width="40" height="7" rx="2" fill="#b48fd9"/>
+          <rect x="24" y="-17" width="36" height="7" rx="2" fill="#8fc97e"/>
+          <rect x="26" y="-24" width="32" height="7" rx="2" fill="#f5c64f"/>
+          <rect x="28" y="-31" width="28" height="7" rx="2" fill="#e8634a"/>
+        </g>
+        <!-- camper holding shirt -->
+        <g transform="translate(-30,-26)">
+          <circle cx="0" cy="-14" r="11" fill="#8a5a3b"/>
+          <path d="M-11 -16 A11 11 0 0 1 11 -16 L9 -24 L-9 -24 Z" fill="#241a12"/>
+          <rect x="-11" y="-4" width="22" height="24" rx="6" fill="#d9543e"/>
+          <rect x="-20" y="-8" width="8" height="18" rx="4" fill="#d9543e" transform="rotate(40 -16 -8)"/>
+          <rect x="12" y="-8" width="8" height="18" rx="4" fill="#d9543e" transform="rotate(-40 16 -8)"/>
+          <path d="M-26 -22 h20 l4 6 l-4 12 h-20 l-4 -12 Z" fill="#7fc3dd" transform="translate(14,-6) scale(0.9)"/>
+        </g>
+      </g>
+      <!-- table 3 -->
+      <g transform="translate(950,470)">
+        <rect x="-65" y="0" width="130" height="12" rx="3" fill="#a9743f"/>
+        <rect x="-57" y="12" width="8" height="34" fill="#7c5630"/>
+        <rect x="49" y="12" width="8" height="34" fill="#7c5630"/>
+        <g>
+          <rect x="-52" y="-8" width="32" height="8" rx="2" fill="#7fc3dd"/>
+          <rect x="-50" y="-16" width="28" height="8" rx="2" fill="#ffffff" stroke="#d8d2c4"/>
+        </g>
+        <g transform="translate(14,-26)">
+          <circle cx="0" cy="-14" r="11" fill="#f1c08e"/>
+          <path d="M-11 -14 A11 11 0 0 1 11 -14 L11 -20 Q0 -30 -11 -20 Z" fill="#c8742e"/>
+          <rect x="-11" y="-4" width="22" height="24" rx="6" fill="#34608d"/>
+          <rect x="-18" y="-2" width="8" height="18" rx="4" fill="#34608d" transform="rotate(20 -14 -2)"/>
+          <rect x="10" y="-2" width="8" height="18" rx="4" fill="#34608d" transform="rotate(-20 14 -2)"/>
+        </g>
+      </g>
+    </g>
+    <!-- wildflowers -->
+    <g>
+      <circle cx="120" cy="430" r="5" fill="#f5c64f"/><rect x="118.5" y="435" width="3" height="14" fill="#4d7a3a"/>
+      <circle cx="420" cy="520" r="5" fill="#e8634a"/><rect x="418.5" y="525" width="3" height="14" fill="#4d7a3a"/>
+      <circle cx="800" cy="520" r="5" fill="#b48fd9"/><rect x="798.5" y="525" width="3" height="14" fill="#4d7a3a"/>
+      <circle cx="1110" cy="450" r="5" fill="#f5c64f"/><rect x="1108.5" y="455" width="3" height="14" fill="#4d7a3a"/>
+    </g>
+  </svg>
+  <div class="hero-copy">
+    <h1>LAUNDRY FOLDING CAMP</h1>
+    <p class="tag">Where every crease counts.</p>
+    <p class="est">Sunriver, Oregon &bull; Est. 2026 &bull; Ages 7 (exactly)</p>
+    <span class="hero-cta"><a class="btn" href="#enroll">Enroll Your Folder</a></span>
+  </div>
+</header>
+
+<section id="about">
+  <h2>America's Premier Textile-Arranging Experience</h2>
+  <div class="rule"></div>
+  <p class="sub">One week. One meadow. One thousand unfolded towels.</p>
+  <div class="about-grid">
+    <div>
+      <p>Nestled along the Deschutes River in beautiful <strong>Sunriver, Oregon</strong>, Laundry Folding Camp is the only sleepaway camp in the Pacific Northwest where seven-year-olds fold laundry <strong>all day, every day</strong> — and ask to do it again tomorrow.</p>
+      <p>No canoes. No archery. No distractions. Just the crisp mountain air, the scent of pine and fabric softener, and the quiet satisfaction of a t-shirt folded into a perfect rectangle on the first try.</p>
+      <p>Campers must be <strong>exactly seven years old</strong>. Not six. Not eight. Seven is the golden age of folding — old enough to respect a crease, young enough to believe in it.</p>
+    </div>
+    <div>
+      <div class="stat-row">
+        <div class="stat"><span class="num">14,000+</span><span class="lbl">items folded per session</span></div>
+        <div class="stat"><span class="num">98.6%</span><span class="lbl">sock match rate</span></div>
+        <div class="stat"><span class="num">0</span><span class="lbl">wrinkles tolerated</span></div>
+        <div class="stat"><span class="num">7</span><span class="lbl">years old, exactly</span></div>
+        <div class="stat"><span class="num">11 hrs</span><span class="lbl">of daily folding</span></div>
+        <div class="stat"><span class="num">1</span><span class="lbl">fitted sheet ever fully conquered</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="gallery">
+  <div class="inner">
+    <h2>Scenes From Camp</h2>
+    <div class="rule"></div>
+    <p class="sub">Snapshots from last summer's record-breaking Fold Season.</p>
+    <div class="gallery-grid">
+
+      <figure class="photo">
+        <!-- Sunrise Fold Circle -->
+        <svg viewBox="0 0 400 300" role="img" aria-label="Campers in a circle around a towel pile at sunrise">
+          <defs>
+            <linearGradient id="g1sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#fca96b"/><stop offset="0.55" stop-color="#fde2a7"/><stop offset="1" stop-color="#fff3d6"/>
+            </linearGradient>
+          </defs>
+          <rect width="400" height="210" fill="url(#g1sky)"/>
+          <circle cx="200" cy="200" r="55" fill="#ff8c42"/>
+          <circle cx="200" cy="200" r="75" fill="#ff8c42" opacity="0.35"/>
+          <path d="M0 210 Q100 170 200 205 Q300 175 400 210 Z" fill="#3c6b4f"/>
+          <rect y="208" width="400" height="92" fill="#6f9a4e"/>
+          <g transform="translate(60,170) scale(0.55)"><path d="M0 -30 L30 30 L-30 30 Z" fill="#1c4630"/><path d="M0 5 L36 60 L-36 60 Z" fill="#163a27"/></g>
+          <g transform="translate(345,165) scale(0.6)"><path d="M0 -30 L30 30 L-30 30 Z" fill="#1c4630"/><path d="M0 5 L36 60 L-36 60 Z" fill="#163a27"/></g>
+          <!-- towel mountain -->
+          <g transform="translate(200,235)">
+            <rect x="-46" y="-10" width="92" height="10" rx="3" fill="#7fc3dd"/>
+            <rect x="-42" y="-20" width="84" height="10" rx="3" fill="#f5c64f"/>
+            <rect x="-38" y="-30" width="76" height="10" rx="3" fill="#e8634a"/>
+            <rect x="-32" y="-40" width="64" height="10" rx="3" fill="#b48fd9"/>
+            <rect x="-26" y="-50" width="52" height="10" rx="3" fill="#8fc97e"/>
+            <rect x="-18" y="-60" width="36" height="10" rx="3" fill="#ffffff" stroke="#d8d2c4"/>
+          </g>
+          <!-- circle of campers -->
+          <g>
+            <g transform="translate(85,255)"><circle cy="-16" r="9" fill="#f1c08e"/><rect x="-9" y="-8" width="18" height="20" rx="5" fill="#d9543e"/></g>
+            <g transform="translate(135,270)"><circle cy="-16" r="9" fill="#8a5a3b"/><rect x="-9" y="-8" width="18" height="20" rx="5" fill="#2f7d4f"/></g>
+            <g transform="translate(265,270)"><circle cy="-16" r="9" fill="#f1c08e"/><rect x="-9" y="-8" width="18" height="20" rx="5" fill="#34608d"/></g>
+            <g transform="translate(315,255)"><circle cy="-16" r="9" fill="#c98e63"/><rect x="-9" y="-8" width="18" height="20" rx="5" fill="#b48fd9"/></g>
+          </g>
+          <!-- birds -->
+          <path d="M90 60 q8 -8 16 0 M110 70 q8 -8 16 0 M290 50 q8 -8 16 0" stroke="#7a5a3a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </svg>
+        <figcaption>6:00 AM Sunrise Fold Circle. The towels never know what hit them.</figcaption>
+      </figure>
+
+      <figure class="photo">
+        <!-- T-shirt Technique class -->
+        <svg viewBox="0 0 400 300" role="img" aria-label="Counselor teaching t-shirt folding at an easel">
+          <rect width="400" height="300" fill="#e9dfc8"/>
+          <rect width="400" height="60" fill="#caa86f"/>
+          <rect y="55" width="400" height="8" fill="#a9853f"/>
+          <text x="200" y="38" text-anchor="middle" font-family="Trebuchet MS, sans-serif" font-size="20" font-weight="bold" fill="#4a3318">FOLD LODGE</text>
+          <!-- easel -->
+          <g transform="translate(110,150)">
+            <path d="M-40 110 L0 -40 L40 110" stroke="#7c5630" stroke-width="7" fill="none"/>
+            <rect x="-46" y="-32" width="92" height="76" rx="4" fill="#fff" stroke="#9c8156" stroke-width="3"/>
+            <!-- fold diagram: shirt with arrows -->
+            <path d="M-26 -16 h16 l4 5 h12 l4 -5 h16 l8 10 l-7 7 l-4 -3 v32 h-46 v-32 l-4 3 l-7 -7 Z" fill="#7fc3dd" stroke="#4a85a3" stroke-width="2"/>
+            <path d="M-14 6 h12 M2 18 l10 0" stroke="#d9543e" stroke-width="3" stroke-linecap="round" marker-end="none"/>
+            <path d="M-2 6 l-4 -4 m4 4 l-4 4 M12 18 l-4 -4 m4 4 l-4 4" stroke="#d9543e" stroke-width="3" stroke-linecap="round"/>
+          </g>
+          <!-- counselor -->
+          <g transform="translate(205,205)">
+            <circle cy="-58" r="14" fill="#c98e63"/>
+            <path d="M-16 -60 a16 16 0 0 1 32 0 l-6 -12 h-20 Z" fill="#365e3c"/>
+            <rect x="-15" y="-46" width="30" height="44" rx="8" fill="#365e3c"/>
+            <rect x="-30" y="-44" width="10" height="30" rx="5" fill="#365e3c" transform="rotate(35 -25 -44)"/>
+            <rect x="13" y="-50" width="10" height="32" rx="5" fill="#365e3c" transform="rotate(-115 18 -50)"/>
+            <rect x="-13" y="-2" width="11" height="30" fill="#5a4632"/>
+            <rect x="2" y="-2" width="11" height="30" fill="#5a4632"/>
+          </g>
+          <!-- seated campers, rapt -->
+          <g>
+            <g transform="translate(280,262)"><circle cy="-26" r="10" fill="#f1c08e"/><rect x="-11" y="-17" width="22" height="22" rx="6" fill="#d9543e"/></g>
+            <g transform="translate(322,268)"><circle cy="-26" r="10" fill="#8a5a3b"/><rect x="-11" y="-17" width="22" height="22" rx="6" fill="#f5c64f"/></g>
+            <g transform="translate(360,260)"><circle cy="-26" r="10" fill="#c98e63"/><rect x="-11" y="-17" width="22" height="22" rx="6" fill="#7fc3dd"/></g>
+          </g>
+          <!-- raised hand -->
+          <g transform="translate(280,262)"><rect x="8" y="-44" width="7" height="22" rx="3.5" fill="#f1c08e" transform="rotate(-15 11 -33)"/></g>
+        </svg>
+        <figcaption>T-Shirt Technique 101 in the Fold Lodge. Yes, that's a raised hand. The question was about collars.</figcaption>
+      </figure>
+
+      <figure class="photo">
+        <!-- Sock sorting by the river -->
+        <svg viewBox="0 0 400 300" role="img" aria-label="Campers matching socks on a line beside the Deschutes River">
+          <defs>
+            <linearGradient id="g3sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#8fd0ea"/><stop offset="1" stop-color="#d8eef7"/>
+            </linearGradient>
+          </defs>
+          <rect width="400" height="190" fill="url(#g3sky)"/>
+          <circle cx="330" cy="50" r="26" fill="#ffd34d"/>
+          <path d="M0 190 Q130 140 260 185 Q330 160 400 185 Z" fill="#4c7a5c"/>
+          <rect y="185" width="400" height="55" fill="#79a653"/>
+          <path d="M0 240 C 90 226, 200 252, 290 234 C 340 226, 380 232, 400 228 L400 300 L0 300 Z" fill="#5aa7c9"/>
+          <path d="M40 262 q20 -6 40 0 M150 256 q20 -6 40 0 M270 250 q20 -6 40 0" stroke="#fff" stroke-width="3" fill="none" opacity="0.6" stroke-linecap="round"/>
+          <!-- sock line -->
+          <rect x="36" y="100" width="6" height="100" fill="#6b4a2b"/>
+          <rect x="358" y="100" width="6" height="100" fill="#6b4a2b"/>
+          <path d="M39 108 Q200 136 361 108" stroke="#5a4632" stroke-width="3" fill="none"/>
+          <g stroke="#3c3325" stroke-width="1.5">
+            <path d="M75 118 v22 q0 10 12 10 h4 v-9 h-6 v-23 Z" fill="#e8634a"/>
+            <path d="M115 124 v22 q0 10 12 10 h4 v-9 h-6 v-23 Z" fill="#f5c64f"/>
+            <path d="M155 128 v22 q0 10 12 10 h4 v-9 h-6 v-23 Z" fill="#e8634a"/>
+            <path d="M195 130 v22 q0 10 12 10 h4 v-9 h-6 v-23 Z" fill="#b48fd9"/>
+            <path d="M235 128 v22 q0 10 12 10 h4 v-9 h-6 v-23 Z" fill="#8fc97e"/>
+            <path d="M275 124 v22 q0 10 12 10 h4 v-9 h-6 v-23 Z" fill="#f5c64f"/>
+            <path d="M315 118 v22 q0 10 12 10 h4 v-9 h-6 v-23 Z" fill="#34608d"/>
+          </g>
+          <!-- campers -->
+          <g transform="translate(120,215)">
+            <circle cy="-20" r="10" fill="#c98e63"/><rect x="-10" y="-11" width="20" height="24" rx="6" fill="#34608d"/>
+            <rect x="8" y="-26" width="7" height="18" rx="3.5" fill="#c98e63" transform="rotate(-35 11 -17)"/>
+          </g>
+          <g transform="translate(250,220)">
+            <circle cy="-20" r="10" fill="#f1c08e"/><rect x="-10" y="-11" width="20" height="24" rx="6" fill="#2f7d4f"/>
+            <rect x="-15" y="-26" width="7" height="18" rx="3.5" fill="#f1c08e" transform="rotate(35 -11 -17)"/>
+          </g>
+          <!-- the lone sock basket -->
+          <g transform="translate(330,222)">
+            <path d="M-22 -8 h44 l-6 22 h-32 Z" fill="#a9743f"/>
+            <path d="M-22 -8 h44" stroke="#7c5630" stroke-width="4"/>
+            <path d="M-6 -14 v8 q0 5 7 5 h3 v-5 h-4 v-8 Z" fill="#e8634a" stroke="#3c3325"/>
+          </g>
+        </svg>
+        <figcaption>Sock Sort by the Deschutes. The orphan-sock basket haunts us all.</figcaption>
+      </figure>
+
+      <figure class="photo">
+        <!-- Fitted sheet challenge -->
+        <svg viewBox="0 0 400 300" role="img" aria-label="A camper wrestling an enormous fitted sheet">
+          <defs>
+            <radialGradient id="g4glow" cx="0.5" cy="0.45" r="0.7">
+              <stop offset="0" stop-color="#fff6dd"/><stop offset="1" stop-color="#e8d4a8"/>
+            </radialGradient>
+          </defs>
+          <rect width="400" height="300" fill="url(#g4glow)"/>
+          <rect y="245" width="400" height="55" fill="#79a653"/>
+          <!-- dramatic spotlight rays -->
+          <g fill="#ffe9a8" opacity="0.55">
+            <path d="M200 0 L150 245 L250 245 Z"/>
+            <path d="M200 0 L60 245 L120 245 Z" opacity="0.4"/>
+            <path d="M200 0 L280 245 L340 245 Z" opacity="0.4"/>
+          </g>
+          <!-- the BEAST: billowing fitted sheet -->
+          <path d="M80 220 Q60 130 140 110 Q150 55 230 70 Q310 50 320 130 Q370 160 330 215 Q300 250 230 235 Q150 260 80 220 Z" fill="#9ecfe6" stroke="#6aa6c4" stroke-width="3"/>
+          <path d="M140 110 Q190 150 175 215 M230 70 Q225 150 245 232 M320 130 Q270 170 280 230" stroke="#6aa6c4" stroke-width="2.5" fill="none" opacity="0.7"/>
+          <!-- elastic corner curling -->
+          <path d="M318 210 q26 6 16 28 q-8 16 -30 8" fill="none" stroke="#4a85a3" stroke-width="4" stroke-linecap="round"/>
+          <!-- camper, legs only visible, mid-struggle -->
+          <g transform="translate(180,248)">
+            <rect x="-22" y="-14" width="11" height="28" rx="5" fill="#5a4632" transform="rotate(20 -16 0)"/>
+            <rect x="10" y="-14" width="11" height="28" rx="5" fill="#5a4632" transform="rotate(-25 16 0)"/>
+            <ellipse cx="-22" cy="16" rx="9" ry="5" fill="#d9543e"/>
+            <ellipse cx="22" cy="16" rx="9" ry="5" fill="#d9543e"/>
+          </g>
+          <!-- one defiant arm bursting out -->
+          <g transform="translate(255,105)">
+            <rect x="-5" y="0" width="10" height="34" rx="5" fill="#f1c08e" transform="rotate(-150 0 0)"/>
+            <circle cx="14" cy="26" r="8" fill="#f1c08e"/>
+          </g>
+          <!-- motion marks -->
+          <path d="M70 150 q-12 6 -8 18 M340 100 q12 -4 10 -16 M120 80 q-8 -10 2 -18" stroke="#b89a5e" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <!-- onlookers -->
+          <g transform="translate(55,262)"><circle cy="-18" r="9" fill="#8a5a3b"/><rect x="-9" y="-10" width="18" height="22" rx="5" fill="#f5c64f"/></g>
+          <g transform="translate(352,262)"><circle cy="-18" r="9" fill="#f1c08e"/><rect x="-9" y="-10" width="18" height="22" rx="5" fill="#b48fd9"/></g>
+        </svg>
+        <figcaption>The Fitted Sheet Final. Maddie went in at 3:15 PM. She emerged victorious at 3:48.</figcaption>
+      </figure>
+
+      <figure class="photo">
+        <!-- Towel tower -->
+        <svg viewBox="0 0 400 300" role="img" aria-label="A camper on a step stool adding a towel to a very tall stack">
+          <defs>
+            <linearGradient id="g5sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#9ed8ee"/><stop offset="1" stop-color="#e6f4f9"/>
+            </linearGradient>
+          </defs>
+          <rect width="400" height="240" fill="url(#g5sky)"/>
+          <circle cx="70" cy="55" r="24" fill="#ffd34d"/>
+          <rect y="238" width="400" height="62" fill="#79a653"/>
+          <g transform="translate(355,180) scale(0.85)"><path d="M0 -40 L32 25 L-32 25 Z" fill="#1e5631"/><path d="M0 0 L38 58 L-38 58 Z" fill="#143d22"/><rect x="-5" y="55" width="10" height="18" fill="#6b4a2b"/></g>
+          <!-- the tower -->
+          <g transform="translate(200,245)">
+            <g stroke="#3c3325" stroke-width="1">
+              <rect x="-48" y="-18" width="96" height="18" rx="4" fill="#e8634a"/>
+              <rect x="-46" y="-36" width="92" height="18" rx="4" fill="#f5c64f"/>
+              <rect x="-47" y="-54" width="94" height="18" rx="4" fill="#7fc3dd"/>
+              <rect x="-45" y="-72" width="90" height="18" rx="4" fill="#b48fd9"/>
+              <rect x="-46" y="-90" width="92" height="18" rx="4" fill="#8fc97e"/>
+              <rect x="-44" y="-108" width="88" height="18" rx="4" fill="#ffffff"/>
+              <rect x="-45" y="-126" width="90" height="18" rx="4" fill="#f5c64f"/>
+              <rect x="-43" y="-144" width="86" height="18" rx="4" fill="#e8634a"/>
+              <rect x="-44" y="-162" width="88" height="18" rx="4" fill="#34608d"/>
+              <rect x="-42" y="-180" width="84" height="18" rx="4" fill="#8fc97e"/>
+            </g>
+            <!-- slight lean -->
+          </g>
+          <!-- camper on stool, reaching -->
+          <g transform="translate(95,245)">
+            <rect x="14" y="-30" width="44" height="8" fill="#a9743f"/>
+            <rect x="16" y="-22" width="7" height="22" fill="#7c5630"/>
+            <rect x="49" y="-22" width="7" height="22" fill="#7c5630"/>
+            <g transform="translate(36,-30)">
+              <rect x="-9" y="-38" width="18" height="30" rx="6" fill="#2f7d4f"/>
+              <circle cy="-48" r="10" fill="#c98e63"/>
+              <path d="M-10 -50 a10 10 0 0 1 20 0 l-4 -8 h-12 Z" fill="#4a3318"/>
+              <rect x="6" y="-66" width="7" height="26" rx="3.5" fill="#c98e63" transform="rotate(-40 9 -53)"/>
+              <rect x="-13" y="-60" width="7" height="22" rx="3.5" fill="#c98e63" transform="rotate(-50 -9 -49)"/>
+              <rect x="-8" y="-8" width="7" height="16" fill="#5a4632"/>
+              <rect x="2" y="-8" width="7" height="16" fill="#5a4632"/>
+            </g>
+            <!-- towel held aloft -->
+            <rect x="48" y="-104" width="46" height="14" rx="4" fill="#ffffff" stroke="#3c3325" transform="rotate(-12 71 -97)"/>
+          </g>
+          <!-- admiring camper -->
+          <g transform="translate(310,268)">
+            <circle cy="-20" r="10" fill="#f1c08e"/><rect x="-10" y="-11" width="20" height="24" rx="6" fill="#d9543e"/>
+            <circle cx="-3" cy="-22" r="1.6" fill="#25332a"/><circle cx="3" cy="-22" r="1.6" fill="#25332a"/>
+            <path d="M-4 -16 q4 4 8 0" stroke="#25332a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          </g>
+          <!-- exclamation -->
+          <text x="320" y="160" font-family="Comic Sans MS, cursive" font-size="18" fill="#c1542c" transform="rotate(8 320 160)">10 high!!</text>
+        </svg>
+        <figcaption>Towel Tower Triumph — camp record, ten towels, zero collapses. We wept.</figcaption>
+      </figure>
+
+      <figure class="photo">
+        <!-- Campfire crease stories -->
+        <svg viewBox="0 0 400 300" role="img" aria-label="Campers around a campfire at night with a glowing clothesline">
+          <defs>
+            <linearGradient id="g6sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#0e1a3a"/><stop offset="0.7" stop-color="#27355e"/><stop offset="1" stop-color="#3f4a70"/>
+            </linearGradient>
+            <radialGradient id="fireGlow" cx="0.5" cy="0.5" r="0.5">
+              <stop offset="0" stop-color="#ffb648" stop-opacity="0.7"/><stop offset="1" stop-color="#ffb648" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect width="400" height="230" fill="url(#g6sky)"/>
+          <!-- stars -->
+          <g fill="#fff">
+            <circle cx="40" cy="36" r="2"/><circle cx="92" cy="70" r="1.5"/><circle cx="150" cy="30" r="2"/>
+            <circle cx="230" cy="52" r="1.5"/><circle cx="296" cy="28" r="2"/><circle cx="352" cy="66" r="1.5"/>
+            <circle cx="378" cy="24" r="2"/><circle cx="196" cy="84" r="1.3"/><circle cx="320" cy="100" r="1.3"/>
+          </g>
+          <circle cx="340" cy="50" r="20" fill="#f4ecd2"/>
+          <circle cx="333" cy="44" r="20" fill="#27355e" opacity="0.9"/>
+          <!-- pine silhouettes -->
+          <g fill="#0a1426">
+            <path d="M30 230 L60 140 L90 230 Z"/><path d="M55 230 L95 110 L135 230 Z"/>
+            <path d="M310 230 L345 120 L380 230 Z"/><path d="M350 230 L378 160 L400 230 Z"/>
+          </g>
+          <rect y="225" width="400" height="75" fill="#1d2b1f"/>
+          <!-- glowing clothesline -->
+          <path d="M95 130 Q200 158 332 128" stroke="#d9c089" stroke-width="2" fill="none" opacity="0.8"/>
+          <g opacity="0.9" stroke="#9c8156" stroke-width="1.5">
+            <rect x="140" y="142" width="28" height="22" rx="2" fill="#caa86f"/>
+            <rect x="190" y="148" width="24" height="26" rx="2" fill="#b48fd9"/>
+            <rect x="240" y="146" width="30" height="20" rx="2" fill="#88a8b8"/>
+          </g>
+          <!-- fire glow -->
+          <ellipse cx="200" cy="240" rx="130" ry="80" fill="url(#fireGlow)"/>
+          <!-- campfire -->
+          <g transform="translate(200,252)">
+            <rect x="-30" y="0" width="60" height="8" rx="4" fill="#4a3318" transform="rotate(8)"/>
+            <rect x="-30" y="0" width="60" height="8" rx="4" fill="#5a4022" transform="rotate(-10)"/>
+            <path d="M0 -42 Q12 -24 6 -10 Q18 -16 16 -2 Q14 8 0 8 Q-14 8 -16 -2 Q-18 -16 -6 -10 Q-12 -24 0 -42 Z" fill="#ff8c42"/>
+            <path d="M0 -26 Q7 -14 4 -6 Q8 -8 7 0 Q5 6 0 6 Q-5 6 -7 0 Q-8 -8 -4 -6 Q-7 -14 0 -26 Z" fill="#ffd34d"/>
+          </g>
+          <!-- campers silhouetted by firelight -->
+          <g>
+            <g transform="translate(118,268)"><circle cy="-18" r="9" fill="#e8a76c"/><rect x="-10" y="-10" width="20" height="22" rx="6" fill="#8c4632"/></g>
+            <g transform="translate(282,268)"><circle cy="-18" r="9" fill="#e8a76c"/><rect x="-10" y="-10" width="20" height="22" rx="6" fill="#5e4a78"/></g>
+            <g transform="translate(155,284)"><circle cy="-18" r="9" fill="#d9985e"/><rect x="-10" y="-10" width="20" height="22" rx="6" fill="#3e5e3a"/></g>
+            <g transform="translate(245,284)"><circle cy="-18" r="9" fill="#e8a76c"/><rect x="-10" y="-10" width="20" height="22" rx="6" fill="#7a5a30"/></g>
+          </g>
+          <!-- sparks -->
+          <g fill="#ffd34d">
+            <circle cx="192" cy="190" r="2"/><circle cx="210" cy="178" r="1.5"/><circle cx="200" cy="165" r="1.2"/>
+          </g>
+        </svg>
+        <figcaption>Campfire &amp; Crease Stories. Tonight's tale: “The Shirt That Was Folded Inside Out.” Chilling.</figcaption>
+      </figure>
+
+    </div>
+  </div>
+</section>
+
+<section id="day">
+  <h2>A Day at Camp</h2>
+  <div class="rule"></div>
+  <p class="sub">Every day. All seven days. They love it. We checked.</p>
+  <div class="sched">
+    <div class="sched-row"><span class="sched-time">6:00 AM</span><span class="sched-what">Wake-up &amp; Wrinkle Inspection <em>(pajamas folded before breakfast — yes, the ones you slept in)</em></span></div>
+    <div class="sched-row"><span class="sched-time">7:00 AM</span><span class="sched-what">Breakfast &amp; Lint Roll Call</span></div>
+    <div class="sched-row"><span class="sched-time">7:30 AM</span><span class="sched-what">Sunrise Fold Circle <em>(towels, meditative)</em></span></div>
+    <div class="sched-row"><span class="sched-time">9:00 AM</span><span class="sched-what">T-Shirt Technique 101 <em>(the rectangle is everything)</em></span></div>
+    <div class="sched-row"><span class="sched-time">11:00 AM</span><span class="sched-what">Speed Folding Heats <em>(stopwatches provided)</em></span></div>
+    <div class="sched-row"><span class="sched-time">12:00 PM</span><span class="sched-what">Lunch <em>(napkin folding optional but strongly encouraged)</em></span></div>
+    <div class="sched-row"><span class="sched-time">1:00 PM</span><span class="sched-what">Sock Sort by the Deschutes</span></div>
+    <div class="sched-row"><span class="sched-time">3:00 PM</span><span class="sched-what">Elective: Fitted Sheets (Advanced) <em>or</em> Pants Crease Lab</span></div>
+    <div class="sched-row"><span class="sched-time">5:00 PM</span><span class="sched-what">Free Fold <em>(camper's choice of garment)</em></span></div>
+    <div class="sched-row"><span class="sched-time">6:00 PM</span><span class="sched-what">Dinner &amp; Towel Tower Exhibition</span></div>
+    <div class="sched-row"><span class="sched-time">7:30 PM</span><span class="sched-what">Campfire &amp; Crease Stories</span></div>
+    <div class="sched-row"><span class="sched-time">8:30 PM</span><span class="sched-what">Lights Out <em>(beds made with hospital corners, obviously)</em></span></div>
+  </div>
+</section>
+
+<section id="badges">
+  <h2>Merit Badges</h2>
+  <div class="rule"></div>
+  <p class="sub">Earned, never given.</p>
+  <div class="badge-grid">
+    <div class="badge"><span class="emoji">🧦</span><span class="badge-name">Sock Matcher</span><p>Pair 50 socks without a single mismatch. Argyle counts double.</p></div>
+    <div class="badge"><span class="emoji">🏔️</span><span class="badge-name">Towel Titan</span><p>Stack eight bath towels with edges aligned to within one finger-width.</p></div>
+    <div class="badge"><span class="emoji">👻</span><span class="badge-name">Sheet Whisperer</span><p>Fold a fitted sheet into a true rectangle. Awarded once in camp history.</p></div>
+    <div class="badge"><span class="emoji">⚡</span><span class="badge-name">Speed Creaser</span><p>Twenty t-shirts in five minutes, retail-display quality.</p></div>
+    <div class="badge"><span class="emoji">🌲</span><span class="badge-name">Pine-Fresh Pro</span><p>Master the line-dry. Bonus points if it smells like Sunriver.</p></div>
+    <div class="badge"><span class="emoji">🎖️</span><span class="badge-name">The Golden Crease</span><p>Camp's highest honor. We don't talk about the requirements.</p></div>
+  </div>
+</section>
+
+<section id="words">
+  <div class="inner">
+    <h2>What Families Are Saying</h2>
+    <div class="rule"></div>
+    <p class="sub">100% real testimonials from 100% fake families.</p>
+    <div class="quote-grid">
+      <blockquote>
+        “Olive came home and reorganized our entire linen closet by thread count. I cried. The closet has never looked better. I'm still crying.”
+        <cite>— Dana P., Bend, OR</cite>
+      </blockquote>
+      <blockquote>
+        “My son now folds his clothes before putting them in the hamper. We're consulting the camp about whether this is normal. They said yes. Extremely normal.”
+        <cite>— Marcus T., Portland, OR</cite>
+      </blockquote>
+      <blockquote>
+        “Seven is such a specific age requirement, and honestly? They're right. Our 8-year-old has completely lost the gift.”
+        <cite>— The Yamamoto Family, Eugene, OR</cite>
+      </blockquote>
+      <blockquote>
+        “I asked my daughter what she did at camp. She held up a fitted sheet folded into a perfect square and whispered, 'everything.'”
+        <cite>— Priya R., Sunriver, OR</cite>
+      </blockquote>
+    </div>
+  </div>
+</section>
+
+<section id="enroll">
+  <h2>Enroll Your Folder</h2>
+  <div class="rule"></div>
+  <div class="enroll-card">
+    <p class="price">$1,749 <small>/ week-long session</small></p>
+    <p style="margin: 0.8rem 0 1.4rem;">Includes lodging in the Fold Lodge, all meals, unlimited laundry (obviously), one (1) commemorative lint roller, and a lifetime of crisp edges.</p>
+    <button class="btn" onclick="enroll()">Reserve a Folding Table</button>
+    <p class="fine">Camper must be exactly 7 years old on the first day of camp. Birth certificates are checked at the gate. Sessions run June–August. Laundry Folding Camp is a fictional establishment; no children were creased in the making of this website.</p>
+  </div>
+</section>
+
+<footer>
+  <p class="loc">🌲 Laundry Folding Camp &bull; 17 Crisp Crease Lane, Sunriver, Oregon 97707</p>
+  <p style="margin-top:0.5rem;">On the banks of the Deschutes River, in the shadow of Mt. Bachelor, beneath a sky that has never seen a wrinkle.</p>
+  <p style="margin-top:0.5rem;">&copy; 2026 Laundry Folding Camp. All folds reserved.</p>
+</footer>
+
+<script>
+  function enroll() {
+    var msgs = [
+      "Wonderful news: the 2026 season is FULL. The waitlist is folded neatly in a drawer.",
+      "Application received! A counselor will assess your child's natural crease instincts shortly.",
+      "Spot reserved! Please begin un-teaching any towel-rolling habits immediately."
+    ];
+    alert(msgs[Math.floor(Math.random() * msgs.length)]);
+  }
+</script>
+
+</body>
+</html>
